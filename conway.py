@@ -29,13 +29,18 @@ def print_board(board: list):
 
 def update_board(board: list):
     def get_num_neighbors(row_coord: int, col_coord: int):
-        return sum(
-            board[row][col] == ALIVE_SPACE
-            for col in range(col_coord - 1, col_coord + 2)
-            for row in range(row_coord - 1, row_coord + 2)
-            if 0 <= row < len(board)
-            and 0 <= col < len(board[0])
-            and (row_coord, col_coord) != (row, col)
+        section_of_interest = [
+            row[max(col_coord - 1, 0) : min(col_coord + 2, len(board))]
+            for row in board[
+                max(row_coord - 1, 0) : min(row_coord + 2, len(board))
+            ]
+        ]
+
+        cell_is_alive = 1 if board[row_coord][col_coord] == ALIVE_SPACE else 0
+
+        return (
+            sum(row.count(ALIVE_SPACE) for row in section_of_interest)
+            - cell_is_alive
         )
 
     # returns whether a cell should be alive the next turn
