@@ -7,13 +7,13 @@ ALIVE_SPACE = "X"
 BORDER = "#"
 
 
-def generate_random_board(x: int, y: int) -> list:
+def generate_random_board(num_rows: int, num_cols: int) -> list:
     return [
         [
             DEAD_SPACE if rand.randint(0, 1) == 1 else ALIVE_SPACE
-            for _ in range(y)
+            for _ in range(num_cols)
         ]
-        for _ in range(x)
+        for _ in range(num_rows)
     ]
 
 
@@ -28,20 +28,21 @@ def print_board(board: list):
 
 
 def update_board(board: list):
-    def get_num_neighbors(x: int, y: int):
-        num = 0
-        for i in range(x - 1, x + 2):
-            for j in range(y - 1, y + 2):
-                if 0 <= i <= len(board) - 1 and 0 <= j <= len(board[0]) - 1:
-                    if board[i][j] == ALIVE_SPACE:
-                        num += 1
-        return num - (1 if board[x][y] == ALIVE_SPACE else 0)
+    def get_num_neighbors(row_coord: int, col_coord: int):
+        return sum(
+            board[row][col] == ALIVE_SPACE
+            for col in range(col_coord - 1, col_coord + 2)
+            for row in range(row_coord - 1, row_coord + 2)
+            if 0 <= row < len(board)
+            and 0 <= col < len(board[0])
+            and (row_coord, col_coord) != (row, col)
+        )
 
     # returns whether a cell should be alive the next turn
-    def cell_state(x: int, y: int) -> bool:
-        num_neighbors = get_num_neighbors(x, y)
+    def cell_state(row_coord: int, col_coord: int) -> bool:
+        num_neighbors = get_num_neighbors(row_coord, col_coord)
 
-        if board[x][y] == ALIVE_SPACE:
+        if board[row_coord][col_coord] == ALIVE_SPACE:
             overpopulated = num_neighbors >= 4
             underpopulated = num_neighbors <= 1
             death = overpopulated or underpopulated
@@ -50,24 +51,26 @@ def update_board(board: list):
         else:
             return num_neighbors == 3
 
-    new_board = [[DEAD_SPACE] * len(board[0]) for i in range(len(board))]
-
-    for x, row in enumerate(board):
-        for y, cell in enumerate(row):
-            new_board[x][y] = ALIVE_SPACE if cell_state(x, y) else DEAD_SPACE
+    new_board = [
+        [
+            ALIVE_SPACE if cell_state(row, col) else DEAD_SPACE
+            for col in range(len(board[0]))
+        ]
+        for row in range(len(board))
+    ]
 
     return new_board
 
 
-width, height = map(
+rows, columns = map(
     int,
     input(
-        "What board size would you like"
-        + "(input as 2 numbers with a space in between): "
+        "What board size would you like?"
+        + " (input as 2 numbers with a space in between): "
     ).split(),
 )
 
-board = generate_random_board(width, height)
+board = generate_random_board(rows, columns)
 
 update_rate = 1 / int(input("How many times should it update per second: "))
 
