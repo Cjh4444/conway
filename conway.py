@@ -62,33 +62,36 @@ def update_board(board: list):
     return new_board
 
 
-rows, columns = map(
-    int,
-    input(
-        "What board size would you like?"
-        + " (input as 2 numbers with a space in between): "
-    ).split(),
-)
+def main():
+    rows, columns = map(
+        int,
+        input(
+            "What board size would you like?"
+            + " (input as 2 numbers with a space in between): "
+        ).split(),
+    )
 
-board = generate_random_board(rows, columns)
+    board = generate_random_board(rows, columns)
 
-update_rate = 1 / int(input("How many times should it update per second: "))
+    update_rate = 1 / int(
+        input("How many times should it update per second: ")
+    )
 
-prev_prev_board = []
-prev_board = []
+    prev_prev_board = []
+    prev_board = []
 
-while board != prev_board and board != prev_prev_board:
-    prev_prev_board = prev_board
-    prev_board = board
+    while board != prev_board and board != prev_prev_board:
+        prev_prev_board = prev_board
+        prev_board = board
+        print_board(board)
+        board = update_board(board)
+        time.sleep(update_rate)
+        os.system("clear")
+
     print_board(board)
-    board = update_board(board)
-    time.sleep(update_rate)
-    os.system("clear")
 
-print_board(board)
+    print("board is dead" if board == prev_board else "permanent repetition")
 
-print(
-    "the board died"
-    if board == prev_board
-    else "the board got stuck in a infinite loop"
-)
+
+if __name__ == "__main__":
+    main()
